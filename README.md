@@ -9,9 +9,9 @@ Adalah API telegram buat bot @partaaibot
 2. Pastiin udah diinstal [npm](https://www.npmjs.org/) secara global
 3. Di terminal coba run perintah2 ini
 	- `cd project-directory`  -> masuk ke folder kerja anda
-	- `npm install telegram-bot-api
-	- `npm install http-request
-	- `node partainu.js` - to run
+	- `npm install telegram-bot-api`
+	- `npm install http-request`
+	- `node partainu.js` - untuk mejalankan
 
 terimakasih
 Gopal -2016
