@@ -131,7 +131,7 @@ api.sendMessage({
 })
 .then(function(data)
 {
-	console.log(util.inspect(data, false, null));
+	// console.log(util.inspect(data, false, null));
 })
 .catch(function(err)
 {
