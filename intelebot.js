@@ -61,7 +61,7 @@ api.on('message', function(message)
 		    headers: { "Content-Type": "application/json" }
 		};
 		 
-		client.post("http://localhost:9099/api/pesans/", args, function (data, response) {
+		client.post("http://192.168.1.241:9099/api/rawpesans/", args, function (data, response) {
 		    console.log('data: ', data);
 		    // console.log('response: ', response);
 		    
