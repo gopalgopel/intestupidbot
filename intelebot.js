@@ -38,13 +38,22 @@ api.on('message', function(message)
 
 	if ((buff[0] == ('/lapor'))&&(buff[1] !== undefined)){
 
-		var pesan, dari, type, d, isi;		
+		var pesan, dari, type, d, isi, catg=[];		
 		if (message.from.username == undefined){
 			if(message.from.last_name == undefined){
 				dari = message.from.first_name;
 			} else dari = message.from.first_name +' '+message.from.last_name;
 		} else dari = '@'+message.from.username;
 
+		if (message.text.indexOf("#") === -1){catg = null;} 
+		else {
+			var re = /(?:^|\W)#(\w+)(?!\w)/g, match;
+			while (match = re.exec(message.text)) {
+			  catg.push(match[1]);
+			}
+			//console.log(catg);
+		}
+		
 		type = message.chat.type;
 		d = new Date(message.date * 1000);
 		isi = message.text.replace('/lapor ','');
@@ -53,6 +62,7 @@ api.on('message', function(message)
     		dari: dari, 
     		type: type,
     		date: d,
+    		category: catg,
     		pesan: isi
 	   	};
 
