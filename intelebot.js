@@ -105,6 +105,7 @@ api.on('message', function(message)
 		    }
 		
 		// ngirim pesan realtime via socket.io
+		console.log("ngirim pesan baru via soket:", args)
 		io.emit('pesanintelbaru',args);
 
 		 //    for (i=0; i<PENERIMA_LAPORAN.length; i++){
