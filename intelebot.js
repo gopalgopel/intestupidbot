@@ -16,7 +16,9 @@ var api = new telegram({
 		get_interval: 1000
 	}
 });
- 
+
+var apindig = "http://192.168.1.241:9099";
+
 // RESTfull API client //
 var Client = require('node-rest-client').Client;
 var client = new Client();
@@ -70,7 +72,7 @@ api.on('message', function(message)
 		    headers: { "Content-Type": "application/json" }
 		};
     	// kirim ke API
-    	client.put("http://localhost:9099/api/rawpesans/"+BUFFID, args, function (data, response) {
+    	client.put(apindig+"/api/rawpesans/"+BUFFID, args, function (data, response) {
 		    // console.log(data);
 		    // console.log(response);
 		    console.log('data: ', data);
@@ -157,7 +159,7 @@ api.on('message', function(message)
 		};
 		 
 		// client.post("http://192.168.1.241:9099/api/rawpesans/", args, function (data, response) {
-		client.post("http://localhost:9099/api/rawpesans/", args, function (data, response) {
+		client.post(apindig+"/api/rawpesans/", args, function (data, response) {
 		    // console.log(data);
 		    // console.log(response);
 		    console.log('data: ', data);
