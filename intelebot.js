@@ -18,6 +18,7 @@ var api = new telegram({
 });
 
 var apindig = "http://192.168.1.241:9099";
+// var apindig = "http://localhost:9099";
 
 // RESTfull API client //
 var Client = require('node-rest-client').Client;
