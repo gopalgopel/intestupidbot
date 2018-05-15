@@ -8,12 +8,13 @@ console.log("GopaL - 2016");
 console.log("===========================================\n\n ");
 
 // TELEGRAM API //
+var TOKEN = '276359910:AAG5hmb-73DzKrur2MtlQiTJnegDIocmjUY';
 var telegram = require('telegram-bot-api');
 var api = new telegram({
-	token: '276359910:AAG5hmb-73DzKrur2MtlQiTJnegDIocmjUY', // @intele_bot token
+	token: TOKEN, // @intele_bot token
 	updates: {
 		enabled: true,
-		get_interval: 1000
+		get_interval: 2000
 	}
 });
 
@@ -38,6 +39,9 @@ io.on('connection', function(socket){
 });
 io.listen(2999);
 
+var https = require('https');
+var fs = require('fs');
+
 
 // GLOBAL VAR // 
 // var PENERIMA_LAPORAN = [165983450,4117519]; // penerima klo ada laporan masuk, 
@@ -59,7 +63,7 @@ var BUFFID, BUFFDARI, BUFFKATEG, BUFFPESAN;
 // behaviour klo nerima message 
 api.on('message', function(message)
 {
-	// lokasi
+	///////////////////////// LOKASI ///////////////////////////////////
 	if (message.location){
     	console.log(message.location);
 
@@ -74,11 +78,7 @@ api.on('message', function(message)
 		};
     	// kirim ke API
     	client.put(apindig+"/api/rawpesans/"+BUFFID, args, function (data, response) {
-		    // console.log(data);
-		    // console.log(response);
 		    console.log('data: ', data);
-		    // console.log('response: ', response);
-		    
 		    
 		    if (data.message.indexOf("updated") >= 0){
 			    api.sendMessage({
@@ -104,116 +104,269 @@ api.on('message', function(message)
 		};
 		console.log("ngirim pesan baru via soket:", soketiopesan)
 		io.emit('pesanintelbaru',soketiopesan);
-
-		 //    for (i=0; i<PENERIMA_LAPORAN.length; i++){
-		 //    	api.sendMessage({
-			// 		chat_id: PENERIMA_LAPORAN[i],
-			// 		text: '<b>'+data.message+'</b>\noleh '+message.chat.id +' / '+dari,
-			// 		parse_mode: 'HTML'
-			// 	})
-			// }
 		});
-    } 
+    } //END OF MESSAGE.LOCATION
 
-    // NORMAL MESSAGE
-	// parsing message
-	var buff = message.text.split(" ");
-	
-	if ((buff[0] == ('/lapor'))&&(buff[1] !== undefined)){
 
-		var pesan, dari, type, d, isi, catg=[];		
-		if (message.from.username == undefined){
-			if(message.from.last_name == undefined){
-				dari = message.from.first_name;
-			} else dari = message.from.first_name +' '+message.from.last_name;
-		} else dari = '@'+message.from.username;
 
-		// ngambil hashtag
-		if (message.text.indexOf("#") === -1){catg = null;} 
-		else {
-			var re = /(?:^|\W)#(\w+)(?!\w)/g, match;
-			while (match = re.exec(message.text)) {
-			  catg.push(match[1]);
+    ///////////////////////// FOTO ///////////////////////////////////
+    if(message.photo){
+
+    	console.log(message.photo);			
+
+    	var buff = message.caption.split(" ");	
+		if ((buff[0] == ('/lapor'))&&(buff[1] !== undefined)){
+			var pesan, dari, type, d, isi, foto, video, catg=[];		
+			if (message.from.username == undefined){
+				if(message.from.last_name == undefined){
+					dari = message.from.first_name;
+				} else dari = message.from.first_name +' '+message.from.last_name;
+			} else dari = '@'+message.from.username;
+
+			// ngambil hashtag
+			if (message.caption.indexOf("#") === -1){catg = null;} 
+			else {
+				var re = /(?:^|\W)#(\w+)(?!\w)/g, match;
+				while (match = re.exec(message.caption)) {
+				  catg.push(match[1]);
+				}
 			}
+			
+			type = message.chat.type;
+			d = new Date(message.date * 1000);
+			isi = message.caption.replace('/lapor ','');
+
+			// save foto
+			client.get("https://api.telegram.org/bot"+TOKEN+"/getFile?file_id="+message.photo[message.photo.length-1].file_id,function(data,r){
+				console.log('data: ', data);
+				foto = data.result.file_path;
+				var request = https.get("https://api.telegram.org/file/bot"+TOKEN+"/"+foto, function(response) {
+				  	var file = fs.createWriteStream(foto);
+					response.pipe(file);
+				});
+				video = null;
+
+				// nyimpen ke var buffer global
+				BUFFDARI = dari; 
+				BUFFKATEG  = catg;
+				BUFFPESAN = isi;
+
+				pesan = {
+		    		dari: dari, 
+		    		type: type,
+		    		date: d,
+		    		category: catg,
+		    		pesan: isi,
+		    		foto: foto,
+		    		video: video
+			   	};
+
+				var args = {
+				    data: pesan,
+				    headers: { "Content-Type": "application/json" }
+				};
+				 
+				client.post(apindig+"/api/rawpesans/", args, function (data, response) {
+				    console.log('data: ', data);	    
+				    
+				    if (data.message.indexOf("berhasil") >= 0){
+
+				    	var s = data.message.search("_id:");
+				    	var n = data.message.search(" } berhasil");
+				    	s=s+5;
+						BUFFID = data.message.substring(s, n);		    	
+
+					    api.sendMessage({
+							chat_id: message.chat.id,
+							text: 'Laporan berhasil disimpan.\nKirim lokasi kejadian / lokasi anda dari menu: '+
+								  '\n<i>attach --> location</i>',
+							parse_mode: 'HTML'
+						});
+						//nambah minta lokasi
+				    } else {
+				    	api.sendMessage({
+							chat_id: message.chat.id,
+							text: 'laporan gagal disimpan, '+data.message,
+							parse_mode: 'HTML'
+						});
+				    }
+				});
+			})
 		}
-		
-		type = message.chat.type;
-		d = new Date(message.date * 1000);
-		isi = message.text.replace('/lapor ','');
+    } //END OF MESSAGE.PHOTO
 
-		// nyimpen ke var buffer global
-		BUFFDARI = dari; 
-		BUFFKATEG  = catg;
-		BUFFPESAN = isi;
 
-		pesan = {
-    		dari: dari, 
-    		type: type,
-    		date: d,
-    		category: catg,
-    		pesan: isi
-	   	};
 
-		var args = {
-		    data: pesan,
-		    headers: { "Content-Type": "application/json" }
-		};
-		 
-		// client.post("http://192.168.1.241:9099/api/rawpesans/", args, function (data, response) {
-		client.post(apindig+"/api/rawpesans/", args, function (data, response) {
-		    // console.log(data);
-		    // console.log(response);
-		    console.log('data: ', data);
-		    // console.log('response: ', response);
-		    
-		    
-		    if (data.message.indexOf("berhasil") >= 0){
+    ///////////////////////// VIDEO ///////////////////////////////////
+    if(message.video){
+    	console.log(message.video);			
 
-		    	var s = data.message.search("_id:");
-		    	var n = data.message.search(" } berhasil");
-		    	s=s+5;
-				BUFFID = data.message.substring(s, n);		    	
+    	var buff = message.caption.split(" ");	
+		if ((buff[0] == ('/lapor'))&&(buff[1] !== undefined)){
+			var pesan, dari, type, d, isi, foto, video, catg=[];		
+			if (message.from.username == undefined){
+				if(message.from.last_name == undefined){
+					dari = message.from.first_name;
+				} else dari = message.from.first_name +' '+message.from.last_name;
+			} else dari = '@'+message.from.username;
 
-		    	{ message: 'pesan { __v: 0,\n  laporan: \'hyygd\',\n  category: null,\n  date: Thu Jun 08 2017 12:09:06 GMT+0700 (WIB),\n  type: \'private\',\n  dari: \'@gopalgopel\',\n  _id: 5938dbf3e9acae5b1d000015 } berhasil digenerate!' }
+			// ngambil hashtag
+			if (message.caption.indexOf("#") === -1){catg = null;} 
+			else {
+				var re = /(?:^|\W)#(\w+)(?!\w)/g, match;
+				while (match = re.exec(message.caption)) {
+				  catg.push(match[1]);
+				}
+			}
+			
+			type = message.chat.type;
+			d = new Date(message.date * 1000);
+			isi = message.caption.replace('/lapor ','');
 
-			    api.sendMessage({
-					chat_id: message.chat.id,
-					text: 'Laporan berhasil disimpan.\nKirim lokasi kejadian / lokasi anda dari menu: '+
-						  '\n<i>attach --> location</i>',
-					parse_mode: 'HTML'
+			// save video
+			client.get("https://api.telegram.org/bot"+TOKEN+"/getFile?file_id="+message.video.file_id,function(data,r){
+				console.log('data: ', data);
+				video = data.result.file_path;
+				var request = https.get("https://api.telegram.org/file/bot"+TOKEN+"/"+video, function(response) {
+				  	var file = fs.createWriteStream(video);
+					response.pipe(file);
 				});
-				//nambah minta lokasi
-		    } else {
-		    	api.sendMessage({
-					chat_id: message.chat.id,
-					text: 'laporan gagal disimpan, '+data.message,
-					parse_mode: 'HTML'
+				foto = null;
+
+				// nyimpen ke var buffer global
+				BUFFDARI = dari; 
+				BUFFKATEG  = catg;
+				BUFFPESAN = isi;
+
+				pesan = {
+		    		dari: dari, 
+		    		type: type,
+		    		date: d,
+		    		category: catg,
+		    		pesan: isi,
+		    		foto: foto,
+		    		video: video
+			   	};
+
+				var args = {
+				    data: pesan,
+				    headers: { "Content-Type": "application/json" }
+				};
+				 
+				client.post(apindig+"/api/rawpesans/", args, function (data, response) {
+				    console.log('data: ', data);	    
+				    
+				    if (data.message.indexOf("berhasil") >= 0){
+
+				    	var s = data.message.search("_id:");
+				    	var n = data.message.search(" } berhasil");
+				    	s=s+5;
+						BUFFID = data.message.substring(s, n);		    	
+
+					    api.sendMessage({
+							chat_id: message.chat.id,
+							text: 'Laporan berhasil disimpan.\nKirim lokasi kejadian / lokasi anda dari menu: '+
+								  '\n<i>attach --> location</i>',
+							parse_mode: 'HTML'
+						});
+						//nambah minta lokasi
+				    } else {
+				    	api.sendMessage({
+							chat_id: message.chat.id,
+							text: 'laporan gagal disimpan, '+data.message,
+							parse_mode: 'HTML'
+						});
+				    }
 				});
-		    }
+			})
+		}
+    } //END OF MESSAGE.VIDEO
+
+
+
+	///////////////////////// TEXT ///////////////////////////////////
+	if(message.text){
+    	var buff = message.text.split(" ");	
+		if ((buff[0] == ('/lapor'))&&(buff[1] !== undefined)){
+			var pesan, dari, type, d, isi, foto, video,catg=[];		
+			if (message.from.username == undefined){
+				if(message.from.last_name == undefined){
+					dari = message.from.first_name;
+				} else dari = message.from.first_name +' '+message.from.last_name;
+			} else dari = '@'+message.from.username;
+
+			// ngambil hashtag
+			if (message.text.indexOf("#") === -1){catg = null;} 
+			else {
+				var re = /(?:^|\W)#(\w+)(?!\w)/g, match;
+				while (match = re.exec(message.text)) {
+				  catg.push(match[1]);
+				}
+			}
+			
+			type = message.chat.type;
+			d = new Date(message.date * 1000);
+			isi = message.text.replace('/lapor ','');
+
+			// nyimpen ke var buffer global
+			BUFFDARI = dari; 
+			BUFFKATEG  = catg;
+			BUFFPESAN = isi;
+
+			pesan = {
+	    		dari: dari, 
+	    		type: type,
+	    		date: d,
+	    		category: catg,
+	    		pesan: isi,
+	    		foto: foto,
+	    		video: video
+		   	};
+
+			var args = {
+			    data: pesan,
+			    headers: { "Content-Type": "application/json" }
+			};
+			 
+			client.post(apindig+"/api/rawpesans/", args, function (data, response) {
+			    console.log('data: ', data);	    
+			    
+			    if (data.message.indexOf("berhasil") >= 0){
+
+			    	var s = data.message.search("_id:");
+			    	var n = data.message.search(" } berhasil");
+			    	s=s+5;
+					BUFFID = data.message.substring(s, n);		    	
+
+				    api.sendMessage({
+						chat_id: message.chat.id,
+						text: 'Laporan berhasil disimpan.\nKirim lokasi kejadian / lokasi anda dari menu: '+
+							  '\n<i>attach --> location</i>',
+						parse_mode: 'HTML'
+					});
+					//nambah minta lokasi
+			    } else {
+			    	api.sendMessage({
+						chat_id: message.chat.id,
+						text: 'laporan gagal disimpan, '+data.message,
+						parse_mode: 'HTML'
+					});
+			    }
+			});
+		}
+
+		if (message.text == ('/help')){  
+			api.sendMessage({
+				chat_id: message.chat.id,
+				text: '<b>untuk menghindari salah posting,</b> maka input laporan diawali /lapor'+
+					  '\n\n<b>Contoh:</b>'+
+					  '\n/lapor ada kerusuhan di lembang. satu korban jiwa dan puluhan luka-luka disebabkan tawuran antar pedagang pasar',
+				parse_mode: 'HTML'
+			});
+		}
+    } // END OF MESSAGE TEXT
+	
 		
-		// ngirim pesan realtime via socket.io
-		// console.log("ngirim pesan baru via soket:", args)
-		// io.emit('pesanintelbaru',args);
-
-		 //    for (i=0; i<PENERIMA_LAPORAN.length; i++){
-		 //    	api.sendMessage({
-			// 		chat_id: PENERIMA_LAPORAN[i],
-			// 		text: '<b>'+data.message+'</b>\noleh '+message.chat.id +' / '+dari,
-			// 		parse_mode: 'HTML'
-			// 	})
-			// }
-		});
-	}
-
-	if (message.text == ('/help')){  
-		api.sendMessage({
-			chat_id: message.chat.id,
-			text: '<b>untuk menghindari salah posting,</b> maka input laporan diawali /lapor'+
-				  '\n\n<b>Contoh:</b>'+
-				  '\n/lapor ada kerusuhan di lembang. satu korban jiwa dan puluhan luka-luka disebabkan tawuran antar pedagang pasar',
-			parse_mode: 'HTML'
-		});
-	}	
 
 }); // end of onMessage
 

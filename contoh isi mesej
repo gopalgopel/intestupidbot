@@ -1,0 +1,112 @@
+CAPTION FOTO
+/////////////////////////////////
+{ update_id: 322711726,
+  message: 
+   { message_id: 1908,
+     from: 
+      { id: 4117519,
+        is_bot: false,
+        first_name: 'Gopal',
+        last_name: 'Gopel',
+        username: 'gopalgopel',
+        language_code: 'en-us' },
+     chat: 
+      { id: 4117519,
+        first_name: 'Gopal',
+        last_name: 'Gopel',
+        username: 'gopalgopel',
+        type: 'private' },
+     date: 1526361543,
+     photo: [ [Object], [Object], [Object] ],
+     caption: '/lapor ada spg disebelah waduk sermo',
+     caption_entities: [ [Object] ] } }
+
+photo:
+[ { file_id: 'AgADBQADAagxG1hw2VdlWaZmm4PPfTqq0zIABDqg6snW8t5J50EDAAEC',
+    file_size: 2469,
+    width: 90,
+    height: 90 },
+  { file_id: 'AgADBQADAagxG1hw2VdlWaZmm4PPfTqq0zIABDBb6z4tWt3w6EEDAAEC',
+    file_size: 36493,
+    width: 320,
+    height: 320 },
+  { file_id: 'AgADBQADAagxG1hw2VdlWaZmm4PPfTqq0zIABAlMe502ieKC6UEDAAEC',
+    file_size: 101010,
+    width: 800,
+    height: 800 } ]
+
+
+CAPTION VIDEO
+/////////////////////////////////
+{ update_id: 322711729,
+  message: 
+   { message_id: 1914,
+     from: 
+      { id: 4117519,
+        is_bot: false,
+        first_name: 'Gopal',
+        last_name: 'Gopel',
+        username: 'gopalgopel',
+        language_code: 'en-us' },
+     chat: 
+      { id: 4117519,
+        first_name: 'Gopal',
+        last_name: 'Gopel',
+        username: 'gopalgopel',
+        type: 'private' },
+     date: 1526361841,
+     video: 
+      { duration: 7,
+        width: 352,
+        height: 640,
+        mime_type: 'video/mp4',
+        thumb: [Object],
+        file_id: 'BAADBQADcQADWHDRV8FkRYhQnDN1Ag',
+        file_size: 2442593 },
+     caption: 'Ini video looooooooh' } }
+
+
+
+TEXT DOAAAAANG
+//////////////////////////////////
+{ update_id: 322711727,
+  message: 
+   { message_id: 1910,
+     from: 
+      { id: 4117519,
+        is_bot: false,
+        first_name: 'Gopal',
+        last_name: 'Gopel',
+        username: 'gopalgopel',
+        language_code: 'en-us' },
+     chat: 
+      { id: 4117519,
+        first_name: 'Gopal',
+        last_name: 'Gopel',
+        username: 'gopalgopel',
+        type: 'private' },
+     date: 1526361612,
+     text: '/lapor sssajahfsjfklsgdjsk djksdjsl djkshfrbk #hdhjs djskd',
+     entities: [ [Object], [Object] ] } }
+
+
+LOKASI LOKASI LOKASI
+/////////////////////////////////////
+{ update_id: 322711728,
+  message: 
+   { message_id: 1912,
+     from: 
+      { id: 4117519,
+        is_bot: false,
+        first_name: 'Gopal',
+        last_name: 'Gopel',
+        username: 'gopalgopel',
+        language_code: 'en-us' },
+     chat: 
+      { id: 4117519,
+        first_name: 'Gopal',
+        last_name: 'Gopel',
+        username: 'gopalgopel',
+        type: 'private' },
+     date: 1526361678,
+     location: { latitude: -6.865653, longitude: 107.583987 } } }
