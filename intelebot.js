@@ -141,7 +141,7 @@ api.on('message', function(message)
 				console.log('data: ', data);
 				foto = data.result.file_path;
 				var request = https.get("https://api.telegram.org/file/bot"+TOKEN+"/"+foto, function(response) {
-				  	var file = fs.createWriteStream(foto);
+				  	var file = fs.createWriteStream("/var/www/html/intelebot/"+foto);
 					response.pipe(file);
 				});
 				video = null;
@@ -228,7 +228,7 @@ api.on('message', function(message)
 				console.log('data: ', data);
 				video = data.result.file_path;
 				var request = https.get("https://api.telegram.org/file/bot"+TOKEN+"/"+video, function(response) {
-				  	var file = fs.createWriteStream(video);
+				  	var file = fs.createWriteStream("/var/www/html/intelebot/"+video);
 					response.pipe(file);
 				});
 				foto = null;
